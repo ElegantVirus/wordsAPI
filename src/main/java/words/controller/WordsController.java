@@ -1,28 +1,25 @@
-package words;
+package words.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import words.service.WordsService;
 
 
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.web.bind.annotation.RequestMethod.*;
-
 @RestController
 public class WordsController {
 
     private static final String GET_WORDS_URI = "/words";
-    private static final String GET_WORD_URI = GET_WORDS_URI + "/{id}";
-    private static final String GET_PALINDROMES_URI = "/palindromes";
+    private static final String GET_PALINDROMES_URI = GET_WORDS_URI + "/palindromes";
 
     @Autowired
     WordsService wordsService;
@@ -37,7 +34,7 @@ public class WordsController {
         return new ResponseEntity<>(words, HttpStatus.OK);
     }
 
-    @RequestMapping(value = GET_WORD_URI, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = GET_WORDS_URI + "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<Integer, String>> getWord(@PathVariable("id") int id) {
         Map<Integer, String> word = wordsService.findById(id);
         if (word.isEmpty()) {
@@ -46,45 +43,45 @@ public class WordsController {
         return new ResponseEntity<>(word, HttpStatus.OK);
     }
 
-//    @RequestMapping(value = GET_WORDS_URI + GET_PALINDROMES_URI, method = GET)
-//    public String getPalidromes() {
-//        JSONObject jsonResponse = new JSONObject();
-//        jsonResponse.put("palindromes", findPalindromes());
-//        return jsonResponse.toString();
-//    }
+    @RequestMapping(value = GET_WORDS_URI + GET_PALINDROMES_URI, method = RequestMethod.GET)
+    public ResponseEntity<List<String>> getPalindromes() {
+        List<String> words = wordsService.getPalindromes();
+        if (words.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(words, HttpStatus.OK);
+    }
 
-//    @RequestMapping(method = PUT)
-//    public String putWord(@RequestBody String json) throws JSONException {
-//        JSONObject jsonObj = new JSONObject(json);
-//        String word = (String) jsonObj.get("word");
-//        int index = (int) jsonObj.get("index");
-//        words.set(index, word);
-//        JSONObject jsonResponse = new JSONObject();
-//        jsonResponse.put("words", words);
-//        return jsonResponse.toString();
-//    }
-//
-//    @RequestMapping(method = POST)
-//    public String postWord(@RequestBody String json) throws JSONException {
-//        JSONObject jsonObj = new JSONObject(json);
-//        String word = (String) jsonObj.get("word");
-//        words.add(word);
-//        JSONObject jsonResponse = new JSONObject();
-//        jsonResponse.put("words", words);
-//        return jsonResponse.toString();
-//    }
-//
-//    @RequestMapping(method = DELETE)
-//    public String deleteWord(@RequestBody String json) throws JSONException {
-//        JSONObject jsonObj = new JSONObject(json);
-//        String word = (String) jsonObj.get("word");
-//        int index = (int) jsonObj.get("index");
-//        if (getIndexes(word).contains(index)) {
-//            words.remove(index);
-//            JSONObject jsonResponse = new JSONObject();
-//            jsonResponse.put("words", words);
-//            return jsonResponse.toString();
-//        } else return "No such word at the index";
-//    }
+    @RequestMapping(method = RequestMethod.PUT)
+    public ResponseEntity<Map<Integer, String>> putWord(@RequestParam int index
+            , @RequestParam String word) {
+
+        Map<Integer, String> foundWord = wordsService.findById(index);
+        if (foundWord.get(index).isEmpty()) {
+//Log - no such word
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        wordsService.putWord(index, word);
+        return new ResponseEntity<>(wordsService.findById(index), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.POST)
+    public ResponseEntity<List<String>> postWord(@RequestParam String word) {
+        wordsService.postWord(word);
+        List<String> updatedWords = wordsService.getAllWords();
+        return new ResponseEntity<>(updatedWords, HttpStatus.CREATED);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE)
+    public ResponseEntity<Map<Integer, String>> deleteWord(@RequestParam int index
+            , @RequestParam String word) {
+        Map<Integer, String> foundWord = wordsService.findById(index);
+        if (foundWord.get(index).isEmpty()) {
+//Log - no such word
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        wordsService.deleteWord(index);
+        return new ResponseEntity<>(wordsService.findById(index), HttpStatus.OK);
+    }
 
 }

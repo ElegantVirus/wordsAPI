@@ -1,4 +1,4 @@
-package words;
+package words.service;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,8 +22,30 @@ public class WordsService {
         return words;
     }
 
-    public Map<Integer, String> findById(int id) {
-        return Collections.singletonMap(id, words.get(id));
+    public List<String> getPalindromes() {
+        return findPalindromes();
+    }
+
+    public Map<Integer, String> findById(final int id) {
+        String word = null;
+        try {
+            word = words.get(id);
+        } catch (Exception e) {
+//implementLogging
+        }
+        return Collections.singletonMap(id, word);
+    }
+
+    public void putWord(final int index, final String word) {
+        words.add(index, word);
+    }
+
+    public void postWord(String word) {
+        words.add(word);
+    }
+
+    public void deleteWord(int index) {
+        words.remove(index);
     }
 
     static void setWords(final String filePath) {
