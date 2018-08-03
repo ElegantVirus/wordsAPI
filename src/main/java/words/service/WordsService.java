@@ -1,86 +1,65 @@
 package words.service;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
-public class WordsService {
-    private static final String FILE_PATH = "\\src\\main\\java\\words\\text.txt";
-    private static List<String> words = new LinkedList<>();
 
-    public WordsService() {
-        setWords(FILE_PATH);
-    }
+@Service
+public interface WordsService {
 
-    public List<String> getAllWords() {
-        return words;
-    }
+    /**
+     * A method to fetch the words.
+     *
+     * @return all words.
+     */
+    List<String> getAllWords();
 
-    public List<String> getPalindromes() {
-        return findPalindromes();
-    }
+    /**
+     * A method to get the word by id.
+     *
+     * @param id words' unique identifier.
+     * @return a map of two values - index and word that was searched for.
+     */
+    Map<Integer, String> findById(int id);
 
-    public Map<Integer, String> findById(final int id) {
-        String word = null;
-        try {
-            word = words.get(id);
-        } catch (Exception e) {
-//implementLogging
-        }
-        return Collections.singletonMap(id, word);
-    }
+    /**
+     * A method to update the word specifying its index.
+     *
+     * @param index words index - position.
+     * @param word  the word.
+     */
+    void putWord(int index, String word);
 
-    public void putWord(final int index, final String word) {
-        words.add(index, word);
-    }
+    /**
+     * A method to add the word to the end of the current words.
+     *
+     * @param word the word.
+     */
+    void postWord(String word);
 
-    public void postWord(String word) {
-        words.add(word);
-    }
+    /**
+     * A method to delete the word.
+     *
+     * @param index words' index.
+     * @param word  the word.
+     * @throws Exception throws exception
+     */
+    void deleteWord(int index, String word) throws Exception;
 
-    public void deleteWord(int index) {
-        words.remove(index);
-    }
+    /**
+     * A method to find palindromes.
+     *
+     * @return a list of palindromes.
+     */
+    List<String> findPalindromes();
 
-    static void setWords(final String filePath) {
-        String currentDirectory = System.getProperty("user.dir");
-        try {
-            words = new LinkedList<>(Arrays.asList(
-                    new Scanner(new File(currentDirectory + filePath)).useDelimiter("\\Z").next().split("[^\\w']+"))
-            );
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private List<String> findPalindromes() {
-        List<String> palindromeList = new ArrayList<>();
-        words.forEach(word -> {
-            if (isPalindrome(word)) {
-                palindromeList.add(word);
-            }
-        });
-        return palindromeList;
-    }
-
-    private static boolean isPalindrome(String str) {
-        return str.equals(new StringBuilder(str).reverse().toString());
-    }
-
-    private static List<Integer> getIndexes(String value) {
-        List<Integer> indexes = new ArrayList<>();
-        final int[] i = {0};
-        words.forEach(word -> {
-            if (word.equals(value))
-                indexes.add(i[0]);
-            i[0]++;
-        });
-        return indexes;
-    }
+    /**
+     * A method to fetch the indexes of a given word.
+     *
+     * @param value the word.
+     * @return a list of indexes.
+     */
+    List<Integer> getIndexes(final String value);
 }
